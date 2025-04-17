@@ -1,7 +1,7 @@
 import flet as ft
 import sqlite3
 import bcrypt
-from database.db import get_db_connection
+from db import get_db_connection
 
 def register_page(page: ft.Page):
     def register(e):

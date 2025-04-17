@@ -1,6 +1,6 @@
 import flet as ft
 import bcrypt
-from database.db import get_db_connection
+from db import get_db_connection
 
 def login_page(page: ft.Page):
     def login(e):

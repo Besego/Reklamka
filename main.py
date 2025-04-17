@@ -1,12 +1,12 @@
 import flet as ft
-from database.db import init_db
-from route.adminPage import admin_page
-from route.loginPage import login_page
-from route.dashboardPage import dashboard_page
-from route.ordersPage import orders_page
-from route.questionnairePage import questionnaire_page
-from route.contractsPage import contracts_page
-from route.registerPage import register_page
+from db import init_db
+from pages.adminPage import admin_page
+from pages.loginPage import login_page
+from pages.dashboardPage import dashboard_page
+from pages.ordersPage import orders_page
+from pages.questionnairePage import questionnaire_page
+from pages.contractsPage import contracts_page
+from pages.registerPage import register_page
 
 def main(page: ft.Page):
     page.title = "Рекламка"

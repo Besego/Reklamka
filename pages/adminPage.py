@@ -1,5 +1,5 @@
 import flet as ft
-from database.db import get_db_connection
+from db import get_db_connection
 
 def admin_page(page: ft.Page):
     def approve_order(order_id):

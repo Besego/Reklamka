@@ -1,5 +1,5 @@
 import flet as ft
-from database.db import get_db_connection
+from db import get_db_connection
 
 def contracts_page(page: ft.Page):
     user_id = page.session.get("user_id")
