@@ -7,7 +7,7 @@ def contracts_page(page: ft.Page):
     conn = get_db_connection()
     c = conn.cursor()
     try:
-        c.execute("SELECT ContractId, ContractDate, ExpiryDate, Terms FROM Contracts WHERE UserId=?", (user_id,))
+        c.execute("SELECT ContractId, ContractName, ContractDate, ExpiryDate, Terms FROM Contracts WHERE UserId=?", (user_id,))
         contracts = c.fetchall()
     except Exception as ex:
         conn.close()
@@ -17,7 +17,7 @@ def contracts_page(page: ft.Page):
         ])
     conn.close()
     
-    contract_texts = [ft.Text(f"Контракт {c[0]}: Дата: {c[1]} - Срок действия: {c[2]} - Условия: {c[3]}") for c in contracts]
+    contract_texts = [ft.Text(f"Контракт {i+1}. Описание заказа: {c[1]} - Дата: {c[2]} - Срок действия: {c[3]} - Условия: {c[4]}") for i, c in enumerate(contracts)]
     back_button = ft.ElevatedButton("Назад", on_click=lambda e: page.go("/dashboard"))
     
     return ft.Column([

@@ -6,8 +6,20 @@ def admin_page(page: ft.Page):
         conn = get_db_connection()
         c = conn.cursor()
         try:
-            c.execute("UPDATE Orders SET Status='approved' WHERE OrderId=?", (order_id,))
-            c.execute("INSERT INTO Contracts (UserId, ContractDate, ExpiryDate, Terms) SELECT UserId, DATE('now'), DATE('now', '+1 year'), 'Стандартные условия' FROM Orders WHERE OrderId=?", (order_id,))
+            # Получаем Description из Orders
+            c.execute("SELECT Description FROM Orders WHERE OrderId=?", (order_id,))
+            description = c.fetchone()[0]
+            
+            # Обновляем статус заказа
+            c.execute("UPDATE Orders SET Status='Одобрено' WHERE OrderId=?", (order_id,))
+            
+            # Вставляем контракт с ContractName = Description
+            c.execute("""
+                INSERT INTO Contracts (UserId, ContractName, ContractDate, ExpiryDate, Terms)
+                SELECT UserId, ?, DATE('now'), DATE('now', '+1 year'), 'Стандартные условия'
+                FROM Orders WHERE OrderId=?
+            """, (description, order_id))
+            
             conn.commit()
         except Exception as ex:
             error_text.value = f"Ошибка: {str(ex)}"
@@ -54,7 +66,11 @@ def admin_page(page: ft.Page):
     conn = get_db_connection()
     c = conn.cursor()
     try:
-        c.execute("SELECT OrderId, UserId, Description, Amount, Status FROM Orders")
+        c.execute("""
+            SELECT Orders.OrderId, Orders.UserId, Users.Email, Orders.Description, Orders.Amount, Orders.Status
+            FROM Orders
+            JOIN Users ON Orders.UserId = Users.UserId
+        """)
         orders = c.fetchall()
     except Exception as ex:
         return ft.Column([
@@ -68,9 +84,9 @@ def admin_page(page: ft.Page):
     order_rows = []
     for order in orders:
         row = ft.Row([
-            ft.Text(f"Заказ {order[0]} (Пользователь {order[1]}): {order[2]} - Сумма: {order[3]} - Статус: {order[4]}"),
-            ft.ElevatedButton("Одобрить", on_click=lambda e, oid=order[0]: approve_order(oid), disabled=order[4] != "На рассмотрении"),
-            ft.ElevatedButton("Отклонить", on_click=lambda e, oid=order[0]: reject_order(oid), disabled=order[4] != "На рассмотрении")
+            ft.Text(f"Заказ {order[0]} (Пользователь: {order[2]}): {order[3]} - Сумма: {order[4]} - Статус: {order[5]}"),
+            ft.ElevatedButton("Одобрить", on_click=lambda e, oid=order[0]: approve_order(oid), disabled=order[5] != "На рассмотрении"),
+            ft.ElevatedButton("Отклонить", on_click=lambda e, oid=order[0]: reject_order(oid), disabled=order[5] != "На рассмотрении")
         ])
         order_rows.append(row)
     

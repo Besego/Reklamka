@@ -10,6 +10,11 @@ def register_page(page: ft.Page):
         phone = phone_field.value
         email = email_field.value
         address = address_field.value
+
+        if not name or not password or not phone or not email or not address:
+            error_text.value = "Все поля обязательны для заполнения"
+            page.update()
+            return
         
         # Хэширование пароля
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())

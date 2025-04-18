@@ -27,7 +27,7 @@ def questionnaire_page(page: ft.Page):
             new_user_order_id = user_order_count + 1
 
             # Добавляем новую заявку с UserOrderId
-            c.execute("INSERT INTO Orders (UserId, UserOrderId, OrderDate, Description, Amount, Status, MaterialId) VALUES (?, ?, DATE('now'), ?, ?, 'pending', ?)",
+            c.execute("INSERT INTO Orders (UserId, UserOrderId, OrderDate, Description, Amount, Status, MaterialId) VALUES (?, ?, DATE('now'), ?, ?, 'На рассмотрении', ?)",
                     (user_id, new_user_order_id, description, amount, material_id))
             conn.commit()
             page.go("/orders")
