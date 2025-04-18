@@ -16,10 +16,8 @@ def register_page(page: ft.Page):
             page.update()
             return
         
-        # Хэширование пароля
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
-        # Сохранение в базу данных
         conn = get_db_connection()
         c = conn.cursor()
         try:
@@ -33,24 +31,73 @@ def register_page(page: ft.Page):
         finally:
             conn.close()
     
-    name_field = ft.TextField(label="Имя")
-    password_field = ft.TextField(label="Пароль", password=True)
-    phone_field = ft.TextField(label="Телефон")
-    email_field = ft.TextField(label="Email")
-    address_field = ft.TextField(label="Адрес")
-    error_text = ft.Text(color="red")
-    register_button = ft.ElevatedButton("Зарегистрироваться", on_click=register)
-    login_button = ft.TextButton("Есть аккаунт?", on_click=lambda _: page.go("/login"))
+    name_field = ft.TextField(
+        label="Имя",
+        border_radius=10,
+        border_color="#4682B4",
+        focused_border_color="#4682B4",
+        width=page.width * 0.9
+    )
+    password_field = ft.TextField(
+        label="Пароль",
+        password=True,
+        border_radius=10,
+        border_color="#4682B4",
+        focused_border_color="#4682B4",
+        width=page.width * 0.9
+    )
+    phone_field = ft.TextField(
+        label="Телефон",
+        border_radius=10,
+        border_color="#4682B4",
+        focused_border_color="#4682B4",
+        width=page.width * 0.9
+    )
+    email_field = ft.TextField(
+        label="Email",
+        border_radius=10,
+        border_color="#4682B4",
+        focused_border_color="#4682B4",
+        width=page.width * 0.9
+    )
+    address_field = ft.TextField(
+        label="Адрес",
+        border_radius=10,
+        border_color="#4682B4",
+        focused_border_color="#4682B4",
+        width=page.width * 0.9
+    )
+    error_text = ft.Text(color="red", size=16)
+    register_button = ft.ElevatedButton(
+        "Зарегистрироваться",
+        on_click=register,
+        bgcolor="#4682B4",
+        color="white",
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+        width=page.width * 0.9,
+        height=50
+    )
+    login_button = ft.TextButton(
+        "Есть аккаунт?",
+        on_click=lambda _: page.go("/login"),
+        style=ft.ButtonStyle(color="#4682B4")
+    )
     
-    # Возвращаем Column вместо page.add()
-    return ft.Column([
-        ft.Text("Регистрация", size=24),
-        name_field,
-        password_field,
-        phone_field,
-        email_field,
-        address_field,
-        error_text,
-        register_button,
-        login_button
-    ])
+    return ft.Container(
+        content=ft.Column([
+            ft.Text("Регистрация", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+            name_field,
+            password_field,
+            phone_field,
+            email_field,
+            address_field,
+            error_text,
+            register_button,
+            login_button
+        ], spacing=15, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True),
+        padding=20,
+        bgcolor="#F5F5F5",
+        border_radius=10,
+        margin=10,
+        expand=True
+    )

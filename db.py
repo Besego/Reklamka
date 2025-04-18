@@ -69,16 +69,16 @@ def init_db():
     c.execute("INSERT OR IGNORE INTO Users (Name, PasswordHash, Phone, Email, Address, RoleId) VALUES (?, ?, ?, ?, ?, ?)",
             ("BesegoAdmin", password_hash.decode('utf-8'), "777777", "BesegoAdminka@reklamka.com", "Monaco", 1))
 
-    # Добавление данных в таблицу Materials
-    materials = [
-        ("Реклама в автобусах", "2025-04-17"),
-        ("Флаеры", "2025-04-17"),
-        ("Плакаты на стенах", "2025-04-17"),
-        ("Баннеры в интернете", "2025-04-17"),
-        ("Реклама на радио", "2025-04-17"),
-    ]
-    for material_type, created_date in materials:
-        c.execute("INSERT OR IGNORE INTO Materials (Type, CreatedDate) VALUES (?, ?)", (material_type, created_date))
+    # # Добавление данных в таблицу Materials
+    # materials = [
+    #     ("Реклама в автобусах", "2025-04-17"),
+    #     ("Флаеры", "2025-04-17"),
+    #     ("Плакаты на стенах", "2025-04-17"),
+    #     ("Баннеры в интернете", "2025-04-17"),
+    #     ("Реклама на радио", "2025-04-17"),
+    # ]
+    # for material_type, created_date in materials:
+    #     c.execute("INSERT OR IGNORE INTO Materials (Type, CreatedDate) VALUES (?, ?)", (material_type, created_date))
 
     conn.commit()
     conn.close()

@@ -11,6 +11,10 @@ from pages.registerPage import register_page
 def main(page: ft.Page):
     page.title = "Рекламка"
 
+    page.window.width = 800 
+    page.window.height = 700
+    page.window.resizable = False  
+
     init_db()
 
     def route_change(route):
@@ -20,7 +24,7 @@ def main(page: ft.Page):
             page.views.append(ft.View(route="/register", controls=[register_page(page)]))
         elif page.route == "/login":
             page.views.append(ft.View(route="/login", controls=[login_page(page)]))
-        elif page.route == "/dashboard" and page.session.get("user_id"):
+        elif page.route == "/dashboard":
             page.views.append(ft.View(route="/dashboard", controls=[dashboard_page(page)]))
         elif page.route == "/questionnaire" and page.session.get("user_id"):
             page.views.append(ft.View(route="/questionnaire", controls=[questionnaire_page(page)]))
@@ -36,6 +40,6 @@ def main(page: ft.Page):
         page.update()
 
     page.on_route_change = route_change
-    page.go("/login")
+    page.go("/dashboard")
 
 ft.app(target=main)
