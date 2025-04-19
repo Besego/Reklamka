@@ -13,6 +13,7 @@ def orders_page(page: ft.Page):
         else:
             c.execute("SELECT OrderId, UserOrderId, Description, Amount, Status FROM Orders WHERE UserId=?", (user_id,))
         orders = c.fetchall()
+        print("Orders in orders_page:", orders)  # Отладочный вывод
     except Exception as ex:
         conn.close()
         return ft.Container(
@@ -52,7 +53,7 @@ def orders_page(page: ft.Page):
             border_radius=10,
             shadow=ft.BoxShadow(blur_radius=5, spread_radius=1, color=ft.colors.with_opacity(0.2, "black")),
             margin=ft.margin.only(bottom=10),
-            height=100,
+            height=130,
             width=page.width - 40
         )
         order_rows.append(row)
