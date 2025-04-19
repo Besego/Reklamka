@@ -1,20 +1,15 @@
 import flet as ft
-from db import get_db_connection
+from db import fetch_contracts_for_user
 
 def contracts_page(page: ft.Page):
     user_id = page.session.get("user_id")
     
-    conn = get_db_connection()
-    c = conn.cursor()
-    try:
-        c.execute("SELECT ContractId, ContractName, ContractDate, ExpiryDate, Terms FROM Contracts WHERE UserId=?", (user_id,))
-        contracts = c.fetchall()
-    except Exception as ex:
-        conn.close()
+    contracts = fetch_contracts_for_user(user_id)
+    if contracts is None:
         return ft.Container(
             content=ft.Column([
                 ft.Text("Ваши контракты", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-                ft.Text(f"Ошибка при загрузке контрактов: {str(ex)}", color="red", size=16)
+                ft.Text("Ошибка при загрузке контрактов", color="red", size=16)
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             padding=20,
             bgcolor="#F5F5F5",
@@ -22,7 +17,6 @@ def contracts_page(page: ft.Page):
             margin=10,
             expand=True
         )
-    conn.close()
     
     contract_rows = []
     for i, c in enumerate(contracts):

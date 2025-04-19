@@ -1,25 +1,16 @@
 import flet as ft
-from db import get_db_connection
+from db import fetch_orders_for_user
 
 def orders_page(page: ft.Page):
     user_id = page.session.get("user_id")
     role = page.session.get("role")
     
-    conn = get_db_connection()
-    c = conn.cursor()
-    try:
-        if role == "admin":
-            c.execute("SELECT OrderId, UserOrderId, Description, Amount, Status FROM Orders")
-        else:
-            c.execute("SELECT OrderId, UserOrderId, Description, Amount, Status FROM Orders WHERE UserId=?", (user_id,))
-        orders = c.fetchall()
-        print("Orders in orders_page:", orders)  # Отладочный вывод
-    except Exception as ex:
-        conn.close()
+    orders = fetch_orders_for_user(user_id, role)
+    if orders is None:
         return ft.Container(
             content=ft.Column([
                 ft.Text("Ваши заказы", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-                ft.Text(f"Ошибка при загрузке заказов: {str(ex)}", color="red", size=16)
+                ft.Text("Ошибка при загрузке заказов", color="red", size=16)
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             padding=20,
             bgcolor="#F5F5F5",
@@ -27,7 +18,6 @@ def orders_page(page: ft.Page):
             margin=10,
             expand=True
         )
-    conn.close()
     
     order_rows = []
     for o in orders:

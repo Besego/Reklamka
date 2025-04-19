@@ -1,5 +1,5 @@
 import flet as ft
-from db import get_db_connection
+from db import fetch_materials, create_order
 
 def questionnaire_page(page: ft.Page):
     def submit(e):
@@ -18,28 +18,25 @@ def questionnaire_page(page: ft.Page):
             page.update()
             return
         
-        conn = get_db_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT COUNT(*) FROM Orders WHERE UserId=?", (user_id,))
-            user_order_count = c.fetchone()[0]
-            new_user_order_id = user_order_count + 1
-            c.execute("INSERT INTO Orders (UserId, UserOrderId, OrderDate, Description, Amount, Status, MaterialId) VALUES (?, ?, DATE('now'), ?, ?, 'На рассмотрении', ?)",
-                    (user_id, new_user_order_id, description, amount, material_id))
-            conn.commit()
+        if create_order(user_id, description, amount, material_id):
             page.go("/orders")
+        else:
+            error_text.value = "Ошибка при создании заказа"
             page.update()
-        except Exception as ex:
-            error_text.value = f"Ошибка: {str(ex)}"
-            page.update()
-        finally:
-            conn.close()
     
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT MaterialId, Type FROM Materials")
-    materials = c.fetchall()
-    conn.close()
+    materials = fetch_materials()
+    if materials is None:
+        return ft.Container(
+            content=ft.Column([
+                ft.Text("Анкета", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                ft.Text("Ошибка при загрузке материалов", color="red", size=16)
+            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            padding=20,
+            bgcolor="#F5F5F5",
+            border_radius=10,
+            margin=10,
+            expand=True
+        )
 
     material_dropdown = ft.Dropdown(
         label="Материал",

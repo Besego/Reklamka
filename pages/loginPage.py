@@ -1,22 +1,17 @@
 import flet as ft
-import bcrypt
-from db import get_db_connection
+from db import login_user
 
 def login_page(page: ft.Page):
     def login(e):
         email = email_field.value
         password = password_field.value
         
-        conn = get_db_connection()
-        c = conn.cursor()
-        c.execute("SELECT UserId, PasswordHash, RoleId FROM Users WHERE Email = ?", (email,))
-        user = c.fetchone()
-        conn.close()
-        
-        if user and bcrypt.checkpw(password.encode('utf-8'), user[1].encode('utf-8')):
-            page.session.set("user_id", user[0])
-            page.session.set("role", "admin" if user[2] == 1 else "user")
-            page.go("/dashboard" if user[2] == 2 else "/dashboard")
+        # Вызываем функцию авторизации из db.py
+        user = login_user(email, password)
+        if user:
+            page.session.set("user_id", user["user_id"])
+            page.session.set("role", user["role"])
+            page.go("/dashboard")
         else:
             error_text.value = "Неверный email или пароль"
             page.update()

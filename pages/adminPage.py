@@ -1,78 +1,24 @@
 import flet as ft
-from db import get_db_connection
+from db import fetch_orders_for_admin, approve_order, reject_order
 
 def admin_page(page: ft.Page):
-    # Определяем все функции в начале
-    def fetch_orders():
-        conn = get_db_connection()
-        c = conn.cursor()
-        try:
-            c.execute("""
-                SELECT Orders.OrderId, Orders.UserId, Users.Email, Orders.Description, Orders.Amount, Orders.Status
-                FROM Orders
-                JOIN Users ON Orders.UserId = Users.UserId
-            """)
-            fetched_orders = c.fetchall()
-            for order in fetched_orders:
-                print(f"Order ID: {order[0]}, Status: {order[5]}")
-            return fetched_orders
-        except Exception as ex:
-            error_text.value = f"Ошибка: {str(ex)}"
-            page.update()
-            return []
-        finally:
-            conn.close()
-    
-    def approve_order(order_id):
-        conn = get_db_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT Description FROM Orders WHERE OrderId=?", (order_id,))
-            description = c.fetchone()[0]
-            c.execute("UPDATE Orders SET Status='Одобрено' WHERE OrderId=?", (order_id,))
-            c.execute("""
-                INSERT INTO Contracts (UserId, ContractName, ContractDate, ExpiryDate, Terms)
-                SELECT UserId, ?, DATE('now'), DATE('now', '+1 year'), 'Стандартные условия'
-                FROM Orders WHERE OrderId=?
-            """, (description, order_id))
-            conn.commit()
-            # Обновляем список заказов
-            for i, order in enumerate(orders):
-                if order[0] == order_id:
-                    updated_order = list(order)
-                    updated_order[5] = "Одобрено"
-                    orders[i] = tuple(updated_order)
-                    break
-            update_order_rows()
-        except Exception as ex:
-            error_text.value = f"Ошибка: {str(ex)}"
-            page.update()
-        finally:
-            conn.close()
-    
-    def reject_order(order_id):
-        conn = get_db_connection()
-        c = conn.cursor()
-        try:
-            c.execute("UPDATE Orders SET Status='Отклонено' WHERE OrderId=?", (order_id,))
-            conn.commit()
-            # Обновляем список заказов
-            for i, order in enumerate(orders):
-                if order[0] == order_id:
-                    updated_order = list(order)
-                    updated_order[5] = "Отклонено"
-                    orders[i] = tuple(updated_order)
-                    break
-            update_order_rows()
-        except Exception as ex:
-            error_text.value = f"Ошибка: {str(ex)}"
-            page.update()
-        finally:
-            conn.close()
+    # Получаем заказы
+    orders = fetch_orders_for_admin()
+    if orders is None:
+        return ft.Container(
+            content=ft.Column([
+                ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                ft.Text("Ошибка при загрузке заказов", color="red", size=16)
+            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            padding=20,
+            bgcolor="#F5F5F5",
+            border_radius=10,
+            margin=10,
+            expand=True
+        )
 
     # Создаём изменяемый список заказов
-    orders = []
-    orders.extend(fetch_orders())
+    orders_list = list(orders)  # Преобразуем в изменяемый список
 
     # Создаём контейнер для карточек заказов
     order_rows_container = ft.Ref[ft.Column]()
@@ -80,7 +26,7 @@ def admin_page(page: ft.Page):
 
     def update_order_rows():
         order_rows_container.current.controls.clear()
-        for order in orders:
+        for order in orders_list:
             is_pending = order[5].strip().lower() == "на рассмотрении"
             row = ft.Container(
                 content=ft.Column([
@@ -95,7 +41,7 @@ def admin_page(page: ft.Page):
                     ft.Row([
                         ft.ElevatedButton(
                             "Одобрить",
-                            on_click=lambda e, oid=order[0]: approve_order(oid),
+                            on_click=lambda e, oid=order[0]: handle_approve_order(oid),
                             disabled=not is_pending,
                             bgcolor="#4682B4" if is_pending else "#808080",
                             color="white",
@@ -105,7 +51,7 @@ def admin_page(page: ft.Page):
                         ),
                         ft.ElevatedButton(
                             "Отклонить",
-                            on_click=lambda e, oid=order[0]: reject_order(oid),
+                            on_click=lambda e, oid=order[0]: handle_reject_order(oid),
                             disabled=not is_pending,
                             bgcolor="#FF4040" if is_pending else "#808080",
                             color="white",
@@ -124,8 +70,36 @@ def admin_page(page: ft.Page):
             )
             order_rows_container.current.controls.append(row)
         page.update()
-    
-    if not orders:
+
+    def handle_approve_order(order_id):
+        if approve_order(order_id):
+            # Обновляем локальный список заказов
+            for i, order in enumerate(orders_list):
+                if order[0] == order_id:
+                    updated_order = list(order)
+                    updated_order[5] = "Одобрено"
+                    orders_list[i] = tuple(updated_order)
+                    break
+            update_order_rows()
+        else:
+            error_text.value = "Ошибка при одобрении заказа"
+            page.update()
+
+    def handle_reject_order(order_id):
+        if reject_order(order_id):
+            # Обновляем локальный список заказов
+            for i, order in enumerate(orders_list):
+                if order[0] == order_id:
+                    updated_order = list(order)
+                    updated_order[5] = "Отклонено"
+                    orders_list[i] = tuple(updated_order)
+                    break
+            update_order_rows()
+        else:
+            error_text.value = "Ошибка при отклонении заказа"
+            page.update()
+
+    if not orders_list:
         return ft.Container(
             content=ft.Column([
                 ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
@@ -139,7 +113,7 @@ def admin_page(page: ft.Page):
         )
     
     order_rows = []
-    for order in orders:
+    for order in orders_list:
         is_pending = order[5].strip().lower() == "на рассмотрении"
         row = ft.Container(
             content=ft.Column([
@@ -154,7 +128,7 @@ def admin_page(page: ft.Page):
                 ft.Row([
                     ft.ElevatedButton(
                         "Одобрить",
-                        on_click=lambda e, oid=order[0]: approve_order(oid),
+                        on_click=lambda e, oid=order[0]: handle_approve_order(oid),
                         disabled=not is_pending,
                         bgcolor="#4682B4" if is_pending else "#808080",
                         color="white",
@@ -164,7 +138,7 @@ def admin_page(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         "Отклонить",
-                        on_click=lambda e, oid=order[0]: reject_order(oid),
+                        on_click=lambda e, oid=order[0]: handle_reject_order(oid),
                         disabled=not is_pending,
                         bgcolor="#FF4040" if is_pending else "#808080",
                         color="white",

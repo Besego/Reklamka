@@ -1,7 +1,5 @@
 import flet as ft
-import sqlite3
-import bcrypt
-from db import get_db_connection
+from db import register_user
 
 def register_page(page: ft.Page):
     def register(e):
@@ -16,20 +14,12 @@ def register_page(page: ft.Page):
             page.update()
             return
         
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        
-        conn = get_db_connection()
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO Users (Name, PasswordHash, Phone, Email, Address, RoleId) VALUES (?, ?, ?, ?, ?, 2)",
-                    (name, password_hash.decode('utf-8'), phone, email, address))
-            conn.commit()
+        # Вызываем функцию регистрации из db.py
+        if register_user(name, password, phone, email, address):
             page.go("/login")
-        except sqlite3.IntegrityError:
+        else:
             error_text.value = "Этот email уже зарегистрирован"
             page.update()
-        finally:
-            conn.close()
     
     name_field = ft.TextField(
         label="Имя",
