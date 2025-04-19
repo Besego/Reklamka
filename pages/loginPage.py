@@ -6,7 +6,6 @@ def login_page(page: ft.Page):
         email = email_field.value
         password = password_field.value
         
-        # Вызываем функцию авторизации из db.py
         user = login_user(email, password)
         if user:
             page.session.set("user_id", user["user_id"])

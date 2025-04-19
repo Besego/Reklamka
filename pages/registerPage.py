@@ -14,7 +14,6 @@ def register_page(page: ft.Page):
             page.update()
             return
         
-        # Вызываем функцию регистрации из db.py
         if register_user(name, password, phone, email, address):
             page.go("/login")
         else:

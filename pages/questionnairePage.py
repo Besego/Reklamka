@@ -6,9 +6,24 @@ def questionnaire_page(page: ft.Page):
         description = description_field.value
         try:
             amount = float(amount_field.value)
-            material_id = int(material_dropdown.value)
+            material_id = int(material_dropdown.value) if material_dropdown.value else None
         except ValueError:
             error_text.value = "Сумма должна быть числом, а материал должен быть выбран"
+            page.update()
+            return
+        
+        if not description:
+            error_text.value = "Поле 'Описание' не может быть пустым"
+            page.update()
+            return
+        
+        if material_id is None:
+            error_text.value = "Пожалуйста, выберите материал"
+            page.update()
+            return
+
+        if amount <= 0:
+            error_text.value = "Сумма должна быть больше нуля"
             page.update()
             return
         

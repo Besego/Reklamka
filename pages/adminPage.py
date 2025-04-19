@@ -2,7 +2,6 @@ import flet as ft
 from db import fetch_orders_for_admin, approve_order, reject_order
 
 def admin_page(page: ft.Page):
-    # Получаем заказы
     orders = fetch_orders_for_admin()
     if orders is None:
         return ft.Container(
@@ -17,10 +16,8 @@ def admin_page(page: ft.Page):
             expand=True
         )
 
-    # Создаём изменяемый список заказов
-    orders_list = list(orders)  # Преобразуем в изменяемый список
+    orders_list = list(orders)
 
-    # Создаём контейнер для карточек заказов
     order_rows_container = ft.Ref[ft.Column]()
     error_text = ft.Text(color="red", size=16)
 
@@ -73,7 +70,6 @@ def admin_page(page: ft.Page):
 
     def handle_approve_order(order_id):
         if approve_order(order_id):
-            # Обновляем локальный список заказов
             for i, order in enumerate(orders_list):
                 if order[0] == order_id:
                     updated_order = list(order)
@@ -87,7 +83,6 @@ def admin_page(page: ft.Page):
 
     def handle_reject_order(order_id):
         if reject_order(order_id):
-            # Обновляем локальный список заказов
             for i, order in enumerate(orders_list):
                 if order[0] == order_id:
                     updated_order = list(order)

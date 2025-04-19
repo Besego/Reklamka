@@ -93,9 +93,9 @@ def init_db():
 
         # Добавление базовых ролей
         conn.execute(text("INSERT INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name) ON CONFLICT (RoleId) DO NOTHING"),
-                     {"role_id": 1, "role_name": "admin"})
+                    {"role_id": 1, "role_name": "admin"})
         conn.execute(text("INSERT INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name) ON CONFLICT (RoleId) DO NOTHING"),
-                     {"role_id": 2, "role_name": "user"})
+                    {"role_id": 2, "role_name": "user"})
 
         # Добавление администратора
         password_hash = bcrypt.hashpw("555555".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -112,20 +112,20 @@ def init_db():
             "role_id": 1
         })
 
-        # Добавление данных в таблицу Materials
-        materials = [
-            ("Реклама в автобусах", "2025-04-17"),
-            ("Флаеры", "2025-04-17"),
-            ("Плакаты на стенах", "2025-04-17"),
-            ("Баннеры в интернете", "2025-04-17"),
-            ("Реклама на радио", "2025-04-17"),
-        ]
-        for material_type, created_date in materials:
-            conn.execute(text('''
-                INSERT INTO Materials (Type, CreatedDate)
-                VALUES (:type, :created_date)
-                ON CONFLICT (MaterialId) DO NOTHING
-            '''), {"type": material_type, "created_date": created_date})
+        # # Добавление данных в таблицу Materials
+        # materials = [
+        #     ("Реклама в автобусах", "2025-04-17"),
+        #     ("Флаеры", "2025-04-17"),
+        #     ("Плакаты на стенах", "2025-04-17"),
+        #     ("Баннеры в интернете", "2025-04-17"),
+        #     ("Реклама на радио", "2025-04-17"),
+        # ]
+        # for material_type, created_date in materials:
+        #     conn.execute(text('''
+        #         INSERT INTO Materials (Type, CreatedDate)
+        #         VALUES (:type, :created_date)
+        #         ON CONFLICT (MaterialId) DO NOTHING
+        #     '''), {"type": material_type, "created_date": created_date})
 
         conn.commit()
     except SQLAlchemyError as ex:
