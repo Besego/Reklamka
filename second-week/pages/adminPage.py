@@ -5,15 +5,16 @@ def admin_page(page: ft.Page):
     orders = fetch_orders_for_admin()
     if orders is None:
         return ft.Container(
-            content=ft.Column([
-                ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-                ft.Text("Ошибка при загрузке заказов", color="red", size=16)
-            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-            padding=20,
-            bgcolor="#F5F5F5",
-            border_radius=10,
-            margin=10,
-            expand=True
+            content=ft.Column(
+                [
+                    ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                    ft.Text("Ошибка при загрузке заказов", color="red", size=16)
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                expand=True
+            ),
+            padding=20
         )
 
     orders_list = list(orders)
@@ -26,44 +27,47 @@ def admin_page(page: ft.Page):
         for order in orders_list:
             is_pending = order[5].strip().lower() == "на рассмотрении"
             row = ft.Container(
-                content=ft.Column([
-                    ft.Text(
-                        f"Заказ {order[0]} (Пользователь: {order[2]}): {order[3]} - Сумма: {order[4]} - Статус: {order[5]}",
-                        size=16,
-                        color="#333333",
-                        max_lines=5,
-                        overflow=ft.TextOverflow.ELLIPSIS,
-                        expand=True
-                    ),
-                    ft.Row([
-                        ft.ElevatedButton(
-                            "Одобрить",
-                            on_click=lambda e, oid=order[0]: handle_approve_order(oid),
-                            disabled=not is_pending,
-                            bgcolor="#4682B4" if is_pending else "#808080",
-                            color="white",
-                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-                            width=120,
-                            height=40
+                content=ft.Column(
+                    [
+                        ft.Text(
+                            f"Заказ {order[0]} (Пользователь: {order[2]}): {order[3]} - Сумма: {order[4]} - Статус: {order[5]}",
+                            size=16,
+                            color="#333333",
+                            max_lines=5,
+                            overflow=ft.TextOverflow.ELLIPSIS,
+                            expand=True
                         ),
-                        ft.ElevatedButton(
-                            "Отклонить",
-                            on_click=lambda e, oid=order[0]: handle_reject_order(oid),
-                            disabled=not is_pending,
-                            bgcolor="#FF4040" if is_pending else "#808080",
-                            color="white",
-                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-                            width=120,
-                            height=40
-                        )
-                    ], alignment=ft.MainAxisAlignment.END)
-                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                        ft.Row([
+                            ft.ElevatedButton(
+                                "Одобрить",
+                                on_click=lambda e, oid=order[0]: handle_approve_order(oid),
+                                disabled=not is_pending,
+                                bgcolor="#4682B4" if is_pending else "#808080",
+                                color="white",
+                                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                                width=120,
+                                height=40
+                            ),
+                            ft.ElevatedButton(
+                                "Отклонить",
+                                on_click=lambda e, oid=order[0]: handle_reject_order(oid),
+                                disabled=not is_pending,
+                                bgcolor="#FF4040" if is_pending else "#808080",
+                                color="white",
+                                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                                width=120,
+                                height=40
+                            )
+                        ], alignment=ft.MainAxisAlignment.END)
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                ),
                 padding=15,
                 bgcolor="white",
                 border_radius=10,
                 shadow=ft.BoxShadow(blur_radius=5, spread_radius=1, color=ft.colors.with_opacity(0.2, "black")),
                 margin=ft.margin.only(bottom=10),
-                width=page.width - 40
+                width=300
             )
             order_rows_container.current.controls.append(row)
         page.update()
@@ -96,59 +100,63 @@ def admin_page(page: ft.Page):
 
     if not orders_list:
         return ft.Container(
-            content=ft.Column([
-                ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-                ft.Text("Нет заказов для отображения", color="red", size=16)
-            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-            padding=20,
-            bgcolor="#F5F5F5",
-            border_radius=10,
-            margin=10,
-            expand=True
+            content=ft.Column(
+                [
+                    ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                    ft.Text("Нет заказов для отображения", color="red", size=16)
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                expand=True
+            ),
+            padding=20
         )
     
     order_rows = []
     for order in orders_list:
         is_pending = order[5].strip().lower() == "на рассмотрении"
         row = ft.Container(
-            content=ft.Column([
-                ft.Text(
-                    f"Заказ {order[0]} (Пользователь: {order[2]}): {order[3]} - Сумма: {order[4]} - Статус: {order[5]}",
-                    size=16,
-                    color="#333333",
-                    max_lines=5,
-                    overflow=ft.TextOverflow.ELLIPSIS,
-                    expand=True
-                ),
-                ft.Row([
-                    ft.ElevatedButton(
-                        "Одобрить",
-                        on_click=lambda e, oid=order[0]: handle_approve_order(oid),
-                        disabled=not is_pending,
-                        bgcolor="#4682B4" if is_pending else "#808080",
-                        color="white",
-                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-                        width=120,
-                        height=40
+            content=ft.Column(
+                [
+                    ft.Text(
+                        f"Заказ {order[0]} (Пользователь: {order[2]}): {order[3]} - Сумма: {order[4]} - Статус: {order[5]}",
+                        size=16,
+                        color="#333333",
+                        max_lines=5,
+                        overflow=ft.TextOverflow.ELLIPSIS,
+                        expand=True
                     ),
-                    ft.ElevatedButton(
-                        "Отклонить",
-                        on_click=lambda e, oid=order[0]: handle_reject_order(oid),
-                        disabled=not is_pending,
-                        bgcolor="#FF4040" if is_pending else "#808080",
-                        color="white",
-                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-                        width=120,
-                        height=40
-                    )
-                ], alignment=ft.MainAxisAlignment.END)
-            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                    ft.Row([
+                        ft.ElevatedButton(
+                            "Одобрить",
+                            on_click=lambda e, oid=order[0]: handle_approve_order(oid),
+                            disabled=not is_pending,
+                            bgcolor="#4682B4" if is_pending else "#808080",
+                            color="white",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                            width=120,
+                            height=40
+                        ),
+                        ft.ElevatedButton(
+                            "Отклонить",
+                            on_click=lambda e, oid=order[0]: handle_reject_order(oid),
+                            disabled=not is_pending,
+                            bgcolor="#FF4040" if is_pending else "#808080",
+                            color="white",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                            width=120,
+                            height=40
+                        )
+                    ], alignment=ft.MainAxisAlignment.END)
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+            ),
             padding=15,
             bgcolor="white",
             border_radius=10,
             shadow=ft.BoxShadow(blur_radius=5, spread_radius=1, color=ft.colors.with_opacity(0.2, "black")),
             margin=ft.margin.only(bottom=10),
-            width=page.width - 40
+            width=300
         )
         order_rows.append(row)
     
@@ -158,29 +166,27 @@ def admin_page(page: ft.Page):
         bgcolor="#4682B4",
         color="white",
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-        width=150,
+        width=300,
         height=50
     )
     
     return ft.Container(
-        content=ft.Column([
-            ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-            error_text,
-            ft.Container(
-                content=ft.Column(
+        content=ft.Column(
+            [
+                ft.Text("Панель администратора", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                error_text,
+                ft.Column(
                     ref=order_rows_container,
                     controls=order_rows,
                     spacing=10,
-                    scroll=ft.ScrollMode.AUTO
+                    scroll=ft.ScrollMode.AUTO,
+                    alignment=ft.MainAxisAlignment.CENTER
                 ),
-                height=510,
-                expand=True
-            ),
-            back_button
-        ], spacing=20, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-        padding=20,
-        bgcolor="#F5F5F5",
-        border_radius=10,
-        margin=10,
-        expand=True
+                back_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True
+        ),
+        padding=20
     )

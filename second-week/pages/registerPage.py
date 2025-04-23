@@ -25,7 +25,7 @@ def register_page(page: ft.Page):
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     password_field = ft.TextField(
         label="Пароль",
@@ -33,28 +33,28 @@ def register_page(page: ft.Page):
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     phone_field = ft.TextField(
         label="Телефон",
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     email_field = ft.TextField(
         label="Email",
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     address_field = ft.TextField(
         label="Адрес",
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     error_text = ft.Text(color="red", size=16)
     register_button = ft.ElevatedButton(
@@ -63,7 +63,7 @@ def register_page(page: ft.Page):
         bgcolor="#4682B4",
         color="white",
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-        width=page.width * 0.9,
+        width=300,
         height=50
     )
     login_button = ft.TextButton(
@@ -73,20 +73,21 @@ def register_page(page: ft.Page):
     )
     
     return ft.Container(
-        content=ft.Column([
-            ft.Text("Регистрация", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-            name_field,
-            password_field,
-            phone_field,
-            email_field,
-            address_field,
-            error_text,
-            register_button,
-            login_button
-        ], spacing=15, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True),
-        padding=20,
-        bgcolor="#F5F5F5",
-        border_radius=10,
-        margin=10,
-        expand=True
+        content=ft.Column(
+            [
+                ft.Text("Регистрация", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                name_field,
+                password_field,
+                phone_field,
+                email_field,
+                address_field,
+                error_text,
+                register_button,
+                login_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True
+        ),
+        padding=20
     )

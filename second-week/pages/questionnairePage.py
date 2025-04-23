@@ -42,15 +42,16 @@ def questionnaire_page(page: ft.Page):
     materials = fetch_materials()
     if materials is None:
         return ft.Container(
-            content=ft.Column([
-                ft.Text("Анкета", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-                ft.Text("Ошибка при загрузке материалов", color="red", size=16)
-            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-            padding=20,
-            bgcolor="#F5F5F5",
-            border_radius=10,
-            margin=10,
-            expand=True
+            content=ft.Column(
+                [
+                    ft.Text("Анкета", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                    ft.Text("Ошибка при загрузке материалов", color="red", size=16)
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                expand=True
+            ),
+            padding=20
         )
 
     material_dropdown = ft.Dropdown(
@@ -62,7 +63,7 @@ def questionnaire_page(page: ft.Page):
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
 
     description_field = ft.TextField(
@@ -70,14 +71,14 @@ def questionnaire_page(page: ft.Page):
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     amount_field = ft.TextField(
         label="Сумма",
         border_radius=10,
         border_color="#4682B4",
         focused_border_color="#4682B4",
-        width=page.width * 0.9
+        width=300
     )
     error_text = ft.Text(color="red", size=16)
     submit_button = ft.ElevatedButton(
@@ -86,7 +87,7 @@ def questionnaire_page(page: ft.Page):
         bgcolor="#4682B4",
         color="white",
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-        width=page.width * 0.9,
+        width=300,
         height=50
     )
     back_button = ft.ElevatedButton(
@@ -95,23 +96,24 @@ def questionnaire_page(page: ft.Page):
         bgcolor="#FF4040",
         color="white",
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-        width=page.width * 0.9,
+        width=300,
         height=50
     )
     
     return ft.Container(
-        content=ft.Column([
-            ft.Text("Анкета", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
-            description_field,
-            amount_field,
-            material_dropdown,
-            error_text,
-            submit_button,
-            back_button
-        ], spacing=15, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True),
-        padding=20,
-        bgcolor="#F5F5F5",
-        border_radius=10,
-        margin=10,
-        expand=True
+        content=ft.Column(
+            [
+                ft.Text("Анкета", size=28, weight=ft.FontWeight.BOLD, color="#333333"),
+                description_field,
+                amount_field,
+                material_dropdown,
+                error_text,
+                submit_button,
+                back_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True
+        ),
+        padding=20
     )

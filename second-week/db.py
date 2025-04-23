@@ -3,21 +3,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from dotenv import load_dotenv
 import bcrypt
+import datetime
 
-# Загружаем переменные из .env файла
 load_dotenv()
 
-# Получаем параметры подключения из .env
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_USER = os.getenv("DB_USER")
-DB_NAME = os.getenv("DB_NAME")
-DB_PASS = os.getenv("DB_PASS")
+db_path = os.path.join(os.getenv("ANDROID_APP_DIR", ""), "mydatabase.db")
+DATABASE_URL = f"sqlite:///{db_path}"
 
-# Формируем строку подключения для PostgreSQL
-DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-# Создаём синхронный движок SQLAlchemy
+# Создаём синхронный движок SQLAlchemy для SQLite
 engine = create_engine(DATABASE_URL, echo=False)
 
 def get_db_connection():
@@ -29,12 +22,10 @@ def get_db_connection():
 
 def init_db():
     """
-    Инициализирует базу данных, создавая таблицы и добавляя начальные данные.
+    Инициализирует базу данных SQLite, создавая таблицы и добавляя начальные данные.
     """
     conn = get_db_connection()
     try:
-        conn.execute(text("SET CONSTRAINTS ALL DEFERRED"))
-
         # Создание таблиц
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS Roles (
@@ -45,7 +36,7 @@ def init_db():
 
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS Users (
-                UserId SERIAL PRIMARY KEY,
+                UserId INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT NOT NULL,
                 PasswordHash TEXT NOT NULL,
                 Phone TEXT,
@@ -58,18 +49,18 @@ def init_db():
 
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS Materials (
-                MaterialId SERIAL PRIMARY KEY,
+                MaterialId INTEGER PRIMARY KEY AUTOINCREMENT,
                 Type TEXT NOT NULL,
-                CreatedDate DATE
+                CreatedDate TEXT  -- SQLite использует TEXT для дат
             )
         '''))
 
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS Orders (
-                OrderId SERIAL PRIMARY KEY,
+                OrderId INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER,
                 UserOrderId INTEGER,
-                OrderDate DATE,
+                OrderDate TEXT,
                 Description TEXT,
                 Amount REAL,
                 Status TEXT,
@@ -81,28 +72,37 @@ def init_db():
 
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS Contracts (
-                ContractId SERIAL PRIMARY KEY,
+                ContractId INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserId INTEGER,
                 ContractName TEXT,
-                ContractDate DATE,
-                ExpiryDate DATE,
+                ContractDate TEXT,
+                ExpiryDate TEXT,
                 Terms TEXT,
                 FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE
             )
         '''))
 
         # Добавление базовых ролей
-        conn.execute(text("INSERT INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name) ON CONFLICT (RoleId) DO NOTHING"),
+        conn.execute(text("INSERT OR IGNORE INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name)"),
                     {"role_id": 1, "role_name": "admin"})
-        conn.execute(text("INSERT INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name) ON CONFLICT (RoleId) DO NOTHING"),
+        conn.execute(text("INSERT OR IGNORE INTO Roles (RoleId, RoleName) VALUES (:role_id, :role_name)"),
                     {"role_id": 2, "role_name": "user"})
+
+        # Добавление начальных материалов
+        conn.execute(text("INSERT OR IGNORE INTO Materials (MaterialId, Type, CreatedDate) VALUES (:material_id, :type, date('now'))"),
+                    {"material_id": 1, "type": "Реклама в автобусах"})
+        conn.execute(text("INSERT OR IGNORE INTO Materials (MaterialId, Type, CreatedDate) VALUES (:material_id, :type, date('now'))"),
+                    {"material_id": 2, "type": "Реклама на стенах"})
+        conn.execute(text("INSERT OR IGNORE INTO Materials (MaterialId, Type, CreatedDate) VALUES (:material_id, :type, date('now'))"),
+                    {"material_id": 3, "type": "Реклама на радио"})
+        conn.execute(text("INSERT OR IGNORE INTO Materials (MaterialId, Type, CreatedDate) VALUES (:material_id, :type, date('now'))"),
+                    {"material_id": 4, "type": "Флаеры"})
 
         # Добавление администратора
         password_hash = bcrypt.hashpw("555555".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         conn.execute(text('''
-            INSERT INTO Users (Name, PasswordHash, Phone, Email, Address, RoleId)
+            INSERT OR IGNORE INTO Users (Name, PasswordHash, Phone, Email, Address, RoleId)
             VALUES (:name, :password_hash, :phone, :email, :address, :role_id)
-            ON CONFLICT (Email) DO NOTHING
         '''), {
             "name": "BesegoAdmin",
             "password_hash": password_hash,
@@ -111,21 +111,6 @@ def init_db():
             "address": "Monaco",
             "role_id": 1
         })
-
-        # # Добавление данных в таблицу Materials
-        # materials = [
-        #     ("Реклама в автобусах", "2025-04-17"),
-        #     ("Флаеры", "2025-04-17"),
-        #     ("Плакаты на стенах", "2025-04-17"),
-        #     ("Баннеры в интернете", "2025-04-17"),
-        #     ("Реклама на радио", "2025-04-17"),
-        # ]
-        # for material_type, created_date in materials:
-        #     conn.execute(text('''
-        #         INSERT INTO Materials (Type, CreatedDate)
-        #         VALUES (:type, :created_date)
-        #         ON CONFLICT (MaterialId) DO NOTHING
-        #     '''), {"type": material_type, "created_date": created_date})
 
         conn.commit()
     except SQLAlchemyError as ex:
@@ -266,7 +251,7 @@ def approve_order(order_id):
         # Создаём контракт
         conn.execute(text('''
             INSERT INTO Contracts (UserId, ContractName, ContractDate, ExpiryDate, Terms)
-            VALUES (:user_id, :contract_name, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 year', 'Стандартные условия')
+            VALUES (:user_id, :contract_name, date('now'), date('now', '+1 year'), 'Стандартные условия')
         '''), {
             "user_id": user_id,
             "contract_name": description
@@ -360,7 +345,7 @@ def create_order(user_id, description, amount, material_id):
         # Создаём заказ
         conn.execute(text('''
             INSERT INTO Orders (UserId, UserOrderId, OrderDate, Description, Amount, Status, MaterialId)
-            VALUES (:user_id, :user_order_id, CURRENT_DATE, :description, :amount, 'На рассмотрении', :material_id)
+            VALUES (:user_id, :user_order_id, date('now'), :description, :amount, 'На рассмотрении', :material_id)
         '''), {
             "user_id": user_id,
             "user_order_id": new_user_order_id,
